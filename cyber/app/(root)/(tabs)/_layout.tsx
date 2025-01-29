@@ -1,6 +1,6 @@
+// app/TabsLayout.js
 import { Tabs } from "expo-router";
 import { Image, ImageSourcePropType, Text, View } from "react-native";
-
 import icons from "@/constants/icons";
 
 const TabIcon = ({
@@ -12,19 +12,21 @@ const TabIcon = ({
   icon: ImageSourcePropType;
   title: string;
 }) => (
-  <View className="flex-1 mt-3 flex flex-col items-center">
+  <View style={{ flex: 1, marginTop: 3, flexDirection: 'column', alignItems: 'center' }}>
     <Image
       source={icon}
       tintColor={focused ? "#0061FF" : "#666876"}
       resizeMode="contain"
-      className="size-6"
+      style={{ width: 24, height: 24 }} // Adjust size as needed
     />
     <Text
-      className={`${
-        focused
-          ? "text-primary-300 font-rubik-medium"
-          : "text-black-200 font-rubik"
-      } text-xs w-full text-center mt-1`}
+      style={{
+        color: focused ? "#0061FF" : "#666876",
+        fontSize: 12,
+        textAlign: 'center',
+        marginTop: 4,
+        fontFamily: focused ? 'Rubik-Medium' : 'Rubik-Regular', // Adjust font family as needed
+      }}
     >
       {title}
     </Text>
@@ -72,6 +74,16 @@ const TabsLayout = () => {
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <TabIcon focused={focused} icon={icons.person} title="Profile" />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="more" // Ensure this matches the filename
+        options={{
+          title: "More",
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={icons.person} title="More" />
           ),
         }}
       />
