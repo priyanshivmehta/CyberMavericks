@@ -1,11 +1,10 @@
-import React, { createContext, useContext, ReactNode } from "react";
-
+import React, { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import { getCurrentUser } from "./appwrite";
 import { useAppwrite } from "./useAppwrite";
-import { Redirect } from "expo-router";
 
 interface GlobalContextType {
   isLogged: boolean;
+  setIsLogged: (loggedIn: boolean) => void; // ✅ Added setter
   user: User | null;
   loading: boolean;
   refetch: (newParams: Record<string, string | number>) => Promise<void>;
@@ -33,12 +32,17 @@ export const GlobalProvider = ({ children }: GlobalProviderProps) => {
     fn: getCurrentUser,
   });
 
-  const isLogged = !!user;
+  const [isLogged, setIsLogged] = useState(!!user); // ✅ State to update login status
+
+  useEffect(() => {
+    setIsLogged(!!user); // ✅ Sync state with user data
+  }, [user]);
 
   return (
     <GlobalContext.Provider
       value={{
         isLogged,
+        setIsLogged, // ✅ Provide setter
         user,
         loading,
         refetch,
