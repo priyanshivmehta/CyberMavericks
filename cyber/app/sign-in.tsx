@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Alert,
   Image,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -23,7 +24,7 @@ const Auth = () => {
   const handleLogin = async () => {
     const result = await login();
     if (result) {
-      refetch({});
+      refetch();
     } else {
       Alert.alert("Error", "Failed to login");
     }
@@ -31,24 +32,27 @@ const Auth = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Image source={images.onboarding} style={styles.image} resizeMode="contain" />
 
-      <View style={styles.contentContainer}>
-        <Text style={styles.welcomeText}>Welcome To Real Scout</Text>
+        <View style={styles.textContainer}>
+          <Text style={styles.welcomeText}>Welcome To Real Scout</Text>
 
-        <Text style={styles.titleText}>
-          Let's Get You Closer To {"\n"}
-          <Text style={styles.highlightText}>Your Ideal Home</Text>
-        </Text>
+          <Text style={styles.titleText}>
+            Let's Get You Closer To {"\n"}
+            <Text style={styles.highlightText}>Your Ideal Home</Text>
+          </Text>
 
-        <Text style={styles.loginText}>Login to Real Scout with Google</Text>
+          <Text style={styles.loginText}>Login to Real Scout with Google</Text>
 
-        <TouchableOpacity onPress={handleLogin} style={styles.button}>
-          <View style={styles.buttonContent}>
-            <Image source={icons.google} style={styles.icon} resizeMode="contain" />
-            <Text style={styles.buttonText}>Continue with Google</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
+            <View style={styles.buttonContent}>
+              <Image source={icons.google} style={styles.googleIcon} resizeMode="contain" />
+              <Text style={styles.buttonText}>Continue with Google</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -57,68 +61,64 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
+  },
+  scrollContainer: {
+    flexGrow: 1,
   },
   image: {
     width: "100%",
-    height: "40%",
+    height: "60%",
   },
-  contentContainer: {
-    width: "100%",
+  textContainer: {
+    paddingHorizontal: 40,
     alignItems: "center",
-    paddingHorizontal: 20,
   },
   welcomeText: {
-    fontSize: 14,
+    fontSize: 16,
     textAlign: "center",
     textTransform: "uppercase",
-    color: "#6B7280",
+    color: "#666",
   },
   titleText: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginTop: 10,
-    color: "#374151",
+    color: "#333",
   },
   highlightText: {
-    color: "#1E40AF",
+    color: "#3498db",
   },
   loginText: {
-    fontSize: 16,
+    fontSize: 18,
+    color: "#666",
     textAlign: "center",
-    marginTop: 20,
-    color: "#6B7280",
+    marginTop: 30,
   },
-  button: {
+  loginButton: {
     backgroundColor: "white",
     elevation: 3,
     borderRadius: 50,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    width: "100%",
+    paddingVertical: 12,
     marginTop: 20,
-    width: "80%",
+    alignItems: "center",
   },
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
   },
-  icon: {
+  googleIcon: {
     width: 20,
     height: 20,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "500",
-    color: "#374151",
-    marginLeft: 8,
+    color: "#333",
+    marginLeft: 10,
   },
 });
 
 export default Auth;
-  
-
-

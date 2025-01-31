@@ -1,5 +1,5 @@
 import { Redirect, Slot } from "expo-router";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useGlobalContext } from "@/lib/global-provider";
@@ -9,8 +9,8 @@ export default function AppLayout() {
 
   if (loading) {
     return (
-      <SafeAreaView className="bg-white h-full flex justify-center items-center">
-        <ActivityIndicator className="text-primary-300" size="large" />
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#4F46E5" />
       </SafeAreaView>
     );
   }
@@ -21,3 +21,12 @@ export default function AppLayout() {
 
   return <Slot />;
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

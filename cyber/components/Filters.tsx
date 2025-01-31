@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
-import { Text, ScrollView, TouchableOpacity } from "react-native";
+import { Text, ScrollView, TouchableOpacity, StyleSheet, View } from "react-native";
 
 import { categories } from "@/constants/data";
 
@@ -25,24 +25,26 @@ const Filters = () => {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      className="mt-3 mb-2"
+      style={styles.scrollView}
     >
       {categories.map((item, index) => (
         <TouchableOpacity
           onPress={() => handleCategoryPress(item.category)}
           key={index}
-          className={`flex flex-col items-start mr-4 px-4 py-2 rounded-full ${
+          style={[
+            styles.categoryButton,
             selectedCategory === item.category
-              ? "bg-primary-300"
-              : "bg-primary-100 border border-primary-200"
-          }`}
+              ? styles.selectedCategory
+              : styles.unselectedCategory,
+          ]}
         >
           <Text
-            className={`text-sm ${
+            style={[
+              styles.categoryText,
               selectedCategory === item.category
-                ? "text-white font-rubik-bold mt-0.5"
-                : "text-black-300 font-rubik"
-            }`}
+                ? styles.selectedText
+                : styles.unselectedText,
+            ]}
           >
             {item.title}
           </Text>
@@ -51,5 +53,39 @@ const Filters = () => {
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  scrollView: {
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  categoryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  selectedCategory: {
+    backgroundColor: "#4A90E2",
+    borderColor: "#4A90E2",
+  },
+  unselectedCategory: {
+    backgroundColor: "#F0F0F0",
+    borderColor: "#CCCCCC",
+  },
+  categoryText: {
+    fontSize: 14,
+  },
+  selectedText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  unselectedText: {
+    color: "#333",
+  },
+});
 
 export default Filters;

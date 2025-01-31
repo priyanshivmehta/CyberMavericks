@@ -1,117 +1,207 @@
+import React from "react";
 import {
-    Alert,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-  } from "react-native";
-  
-  import icons from "@/constants/icons"; 
-  
-  const user = {
-    name: "John Doe",
-    avatar: "https://via.placeholder.com/150",
-    email: "john.doe@example.com",
-    phone: "+1 234 567 890",
-    age: "25",
-    dob: "15 June 1998",
-  };
-  
-  const settings = [
-    { icon: icons.calendar, title: "My Bookings" },
-    { icon: icons.wallet, title: "Payments" },
-    { icon: icons.wallet, title: "Settings" },
-    { icon: icons.wallet, title: "Help & Support" },
-  ];
-  
-  interface SettingsItemProps {
-    icon: any;
-    title: string;
-    textStyle?: string;
-  }
+  Alert,
+  Image,
+  ImageSourcePropType,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  TextStyle,
+} from "react-native";
 
-  const SettingsItem = ({ icon, title, textStyle }: SettingsItemProps) => (
-      <TouchableOpacity className="flex flex-row items-center justify-between py-3">
-        <View className="flex flex-row items-center gap-3">
-          <Image source={icon} className="size-6" />
-          <Text className={`text-lg font-rubik-medium text-black-300 ${textStyle}`}>{title}</Text>
-        </View>
-        <Image source={icons.rightArrow} className="size-5" />
-      </TouchableOpacity>
-    );
-  
-  const Profile = () => {
-    return (
-      <SafeAreaView className="h-full bg-white">
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerClassName="pb-32 px-7"
-        >
-          {/* Header */}
-          <View className="flex flex-row items-center justify-between mt-5">
-            <Text className="text-xl font-rubik-bold">Profile</Text>
-            <Image source={icons.bell} className="size-5" />
-          </View>
-  
-          {/* Profile Image & Name */}
-          <View className="flex flex-row justify-center mt-5">
-            <View className="flex flex-col items-center relative mt-5">
-              <Image
-                source={{ uri: user.avatar }}
-                className="size-44 rounded-full"
-              />
-              <TouchableOpacity className="absolute bottom-11 right-2">
-                <Image source={icons.edit} className="size-9" />
-              </TouchableOpacity>
-              <Text className="text-2xl font-rubik-bold mt-2">{user.name}</Text>
-            </View>
-          </View>
-  
-          {/* Details Card */}
-          <View className="bg-white p-5 rounded-lg shadow-md mt-8">
-            {(["email", "phone", "age", "dob"] as (keyof typeof user)[]).map((field, index) => (
-              <View
-                key={index}
-                className={`flex-row justify-between items-center py-4 ${
-                  index !== 3 ? "border-b border-gray-300" : ""
-                }`}
-              >
-                <Text className="text-lg text-gray-600 capitalize font-medium">
-                  {field}
-                </Text>
-                <View className="flex-row items-center">
-                  <Text className="text-lg text-gray-900 font-semibold">
-                    {user[field]}
-                  </Text>
-                  <TouchableOpacity className="ml-3">
-                    <Image source={icons.edit} className="size-6" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </View>
-  
-          {/* Settings Options */}
-          <View className="flex flex-col mt-10">
-            {settings.map((item, index) => (
-              <SettingsItem key={index} {...item} />
-            ))}
-          </View>
-  
-          {/* Logout Option (Static) */}
-          <View className="flex flex-col border-t mt-5 pt-5 border-primary-200">
-            <SettingsItem
-              icon={icons.logout}
-              title="Logout"
-              textStyle="text-danger"
-            />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    );
+import { logout } from "@/lib/appwrite";
+import { useGlobalContext } from "@/lib/global-provider";
+
+import icons from "@/constants/icons";
+import { settings } from "@/constants/data";
+
+interface SettingsItemProp {
+  icon: ImageSourcePropType;
+  title: string;
+  onPress?: () => void;
+  textStyle?: TextStyle;
+  showArrow?: boolean;
+}
+
+const SettingsItem = ({
+  icon,
+  title,
+  onPress,
+  textStyle,
+  showArrow = true,
+}: SettingsItemProp) => (
+  <TouchableOpacity onPress={onPress} style={styles.settingsItem}>
+    <View style={styles.iconTextContainer}>
+      <Image source={icon} style={styles.icon} />
+      <Text style={[styles.text, textStyle]}>{title}</Text>
+    </View>
+    {showArrow && <Image source={icons.rightArrow} style={styles.arrow} />}
+  </TouchableOpacity>
+);
+
+const Profile = () => {
+  const { user, refetch } = useGlobalContext();
+
+  const handleLogout = async () => {
+    const result = await logout();
+    if (result) {
+      Alert.alert("Success", "Logged out successfully");
+      refetch({});
+    } else {
+      Alert.alert("Error", "Failed to logout");
+    }
   };
-  
-  export default Profile;
-  
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Profile</Text>
+          <Image source={icons.bell} style={styles.bellIcon} />
+        </View>
+
+        <View style={styles.profileContainer}>
+          <View style={styles.avatarContainer}>
+            <Image
+              source={{ uri: user?.avatar }}
+              style={styles.avatar}
+            />
+            <TouchableOpacity style={styles.editButton}>
+              <Image source={icons.edit} style={styles.editIcon} />
+            </TouchableOpacity>
+
+            <Text style={styles.profileName}>{user?.name}</Text>
+          </View>
+        </View>
+
+        <View style={styles.settingsContainer}>
+          <SettingsItem icon={icons.calendar} title="My Bookings" />
+          <SettingsItem icon={icons.wallet} title="Payments" />
+        </View>
+
+        <View style={styles.additionalSettingsContainer}>
+          {settings.slice(2).map((item, index) => (
+            <SettingsItem key={index} {...item} />
+          ))}
+        </View>
+
+        <View style={styles.logoutContainer}>
+          <SettingsItem
+            icon={icons.logout}
+            title="Logout"
+            textStyle={styles.logoutText}
+            showArrow={false}
+            onPress={handleLogout}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  scrollViewContent: {
+    paddingBottom: 32,
+    paddingHorizontal: 28,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  headerText: {
+    fontSize: 24,
+    fontFamily: "Rubik-Bold",
+  },
+  bellIcon: {
+    width: 20,
+    height: 20,
+  },
+  profileContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  avatarContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    marginTop: 20,
+    position: "relative",
+  },
+  avatar: {
+    width: 176,
+    height: 176,
+    borderRadius: 88,
+  },
+  editButton: {
+    position: "absolute",
+    bottom: 44,
+    right: 8,
+  },
+  editIcon: {
+    width: 36,
+    height: 36,
+  },
+  profileName: {
+    fontSize: 24,
+    fontFamily: "Rubik-Bold",
+    marginTop: 10,
+  },
+  settingsContainer: {
+    flexDirection: "column",
+    marginTop: 40,
+  },
+  additionalSettingsContainer: {
+    flexDirection: "column",
+    marginTop: 20,
+    borderTopWidth: 1,
+    paddingTop: 20,
+    borderColor: "#E0E0E0",
+  },
+  logoutContainer: {
+    flexDirection: "column",
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderColor: "#E0E0E0",
+    marginBottom:50,
+  },
+  settingsItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+  },
+  iconTextContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+  },
+  text: {
+    fontSize: 18,
+    fontFamily: "Rubik-Medium",
+    color: "#212121",
+  },
+  arrow: {
+    width: 20,
+    height: 20,
+  },
+  logoutText: {
+    color: "red",
+  },
+});
+
+export default Profile;

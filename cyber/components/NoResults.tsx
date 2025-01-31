@@ -1,24 +1,37 @@
-import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 
 import images from "@/constants/images";
 
 const NoResults = () => {
   return (
-    <View className="flex items-center my-5">
-      <Image
-        source={images.noResult}
-        className="w-11/12 h-80"
-        resizeMode="contain"
-      />
-      <Text className="text-2xl font-rubik-bold text-black-300 mt-5">
-        No Result
-      </Text>
-      <Text className="text-base text-black-100 mt-2">
-        We could not find any result
-      </Text>
+    <View style={styles.container}>
+      <Image source={images.noResult} style={styles.image} resizeMode="contain" />
+      <Text style={styles.title}>No Result</Text>
+      <Text style={styles.subtitle}>We could not find any result</Text>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  image: {
+    width: "90%",
+    height: 320,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    marginTop: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 5,
+  },
+});
 
 export default NoResults;
