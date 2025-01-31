@@ -1,113 +1,143 @@
-// import { Image, Text, View, StyleSheet, TouchableOpacity } from "react-native";
-// import { Link } from 'expo-router';
-// import { SafeAreaView } from 'react-native-safe-area-context';
-// import images from "@/constants/images";
-// import icons from "@/constants/icons";
-// import Search from "@/components/Search";
-// import {Card, FeaturedCard} from "@/components/Cards";
-
-// export default function Index() {
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <View style={styles.innerContainer}>
-//         <View style={styles.row}>
-//           <View style={styles.profileContainer}>
-//             <Image source={images.avatar} style={styles.avatar} />
-//             <View style={styles.textContainer}>
-//               <Text style={styles.greetingText}>Hello,</Text>
-//               <Text style={styles.nameText}>John Doe</Text>
-//             </View>
-//             <Image source={icons.bell} style={styles.bellIcon} />
-//           </View>
-//         </View>
-//         <Search />
-//         <View style={styles.my5}>
-//           <View style={styles.flexRow}>
-//             <Text style={styles.featuredText}>Featured</Text>
-//             <TouchableOpacity>
-//               <Text style={styles.viewAllText}>View All</Text>
-//             </TouchableOpacity>
-//           </View>
-//         </View>
-
-//       <FeaturedCard />
-//       <Card />
-//       </View>
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     backgroundColor: 'white',
-//     flex: 1,
-//   },
-//   innerContainer: {
-//     paddingHorizontal: 20,
-//   },
-//   row: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     justifyContent: 'space-between',
-//     marginTop: 20,
-//   },
-//   profileContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   avatar: {
-//     width: 48, // Adjust size as needed
-//     height: 48, // Adjust size as needed
-//     borderRadius: 24, // Half of width/height for circular image
-//   },
-//   textContainer: {
-//     flexDirection: 'column',
-//     alignItems: 'flex-start',
-//     marginLeft: 8,
-//     justifyContent: 'center',
-//   },
-//   greetingText: {
-//     fontSize: 12, // Adjust size as needed
-//     fontWeight: 'bold',
-//     color: '#000', // Adjust color as needed
-//   },
-//   nameText: {
-//     fontSize: 16, // Adjust size as needed
-//     fontWeight: 'bold',
-//     color: '#000', // Adjust color as needed
-//   },
-//   bellIcon: {
-//     width: 24, // Adjust size as needed
-//     height: 24, // Adjust size as needed
-//   },
-//   my5: {
-//     marginVertical: 20,
-//   },
-//   flexRow: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//   },
-//   featuredText: {
-//     fontSize: 20, // Adjust size as needed
-//     fontWeight: 'bold',
-//     color: '#000', // Adjust color as needed
-//   },
-//   viewAllText: {
-//     fontSize: 14, // Adjust size as needed
-//     color: '#007BFF', // Adjust color as needed for the link style
-//   },
-// });
-
-import { View, Text} from 'react-native'
-import React from 'react'
-
-const Explore = () => {
-    return (
-        <View>
-            <Text>Explore</Text>
-        </View>
-    )
-}
-export default Explore;
-
+import {
+      ActivityIndicator,
+      FlatList,
+      Image,
+      Text,
+      TouchableOpacity,
+      View,
+    } from "react-native";
+    import { useEffect } from "react";
+    import { router, useLocalSearchParams } from "expo-router";
+    import { SafeAreaView } from "react-native-safe-area-context";
+    
+    import icons from "@/constants/icons";
+    
+    import Search from "@/components/Search";
+    import Filters from "@/components/Filters";
+    import NoResults from "@/components/NoResults";
+    import { Card, FeaturedCard } from "@/components/Cards";
+    
+    import { useAppwrite } from "@/lib/useAppwrite";
+    import { useGlobalContext } from "@/lib/global-provider";
+    import { getLatestProperties, getProperties } from "@/lib/appwrite";
+    
+    const Home = () => {
+      const { user } = useGlobalContext();
+    
+      const params = useLocalSearchParams<{ query?: string; filter?: string }>();
+    
+      const { data: latestProperties, loading: latestPropertiesLoading } =
+        useAppwrite({
+          fn: getLatestProperties,
+        });
+    
+      const {
+        data: properties,
+        refetch,
+        loading,
+      } = useAppwrite({
+        fn: getProperties,
+        params: {
+          filter: params.filter!,
+          query: params.query!,
+          limit: 6,
+        },
+        skip: true,
+      });
+    
+      useEffect(() => {
+        refetch({
+          filter: params.filter!,
+          query: params.query!,
+          limit: 6,
+        });
+      }, [params.filter, params.query]);
+    
+      const handleCardPress = (id: string) => router.push(`/properties/${id}`);
+    
+      return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+          <FlatList
+            data={properties}
+            numColumns={2}
+            renderItem={({ item }) => (
+              <Card item={item} onPress={() => handleCardPress(item.$id)} />
+            )}
+            keyExtractor={(item) => item.$id}
+            contentContainerStyle={{ paddingBottom: 32 }}
+            columnWrapperStyle={{ flexDirection: "row", gap: 10, paddingHorizontal: 16 }}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              loading ? (
+                <ActivityIndicator size="large" color="#00A3FF" style={{ marginTop: 20 }} />
+              ) : (
+                <NoResults />
+              )
+            }
+            ListHeaderComponent={() => (
+              <View style={{ paddingHorizontal: 16 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 20 }}>
+                  <View style={{ flexDirection: "row" }}>
+                    <Image
+                      source={{ uri: user?.avatar }}
+                      style={{ width: 48, height: 48, borderRadius: 24 }}
+                    />
+                    <View style={{ flexDirection: "column", justifyContent: "center", marginLeft: 8 }}>
+                      <Text style={{ fontSize: 12, color: "#757575" }}>Good Morning</Text>
+                      <Text style={{ fontSize: 16, fontWeight: "500", color: "#4F4F4F" }}>
+                        {user?.name}
+                      </Text>
+                    </View>
+                  </View>
+                  <Image source={icons.bell} style={{ width: 24, height: 24 }} />
+                </View>
+    
+                <Search />
+    
+                <View style={{ marginVertical: 20 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={{ fontSize: 20, fontWeight: "700", color: "#4F4F4F" }}>Featured</Text>
+                    <TouchableOpacity>
+                      <Text style={{ fontSize: 14, fontWeight: "700", color: "#00A3FF" }}>See all</Text>
+                    </TouchableOpacity>
+                  </View>
+    
+                  {latestPropertiesLoading ? (
+                    <ActivityIndicator size="large" color="#00A3FF" />
+                  ) : !latestProperties || latestProperties.length === 0 ? (
+                    <NoResults />
+                  ) : (
+                    <FlatList
+                      data={latestProperties}
+                      renderItem={({ item }) => (
+                        <FeaturedCard item={item} onPress={() => handleCardPress(item.$id)} />
+                      )}
+                      keyExtractor={(item) => item.$id}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={{ flexDirection: "row", gap: 10, marginTop: 20 }}
+                    />
+                  )}
+                </View>
+    
+                <View style={{ marginTop: 20 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={{ fontSize: 20, fontWeight: "700", color: "#4F4F4F" }}>
+                      Our Recommendation
+                    </Text>
+                    <TouchableOpacity>
+                      <Text style={{ fontSize: 14, fontWeight: "700", color: "#00A3FF" }}>See all</Text>
+                    </TouchableOpacity>
+                  </View>
+    
+                  <Filters />
+                </View>
+              </View>
+            )}
+          />
+        </SafeAreaView>
+      );
+    };
+    
+    export default Home;
+    
