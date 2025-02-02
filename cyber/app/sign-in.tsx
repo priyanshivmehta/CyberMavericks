@@ -24,7 +24,7 @@ const Auth = () => {
   const handleLogin = async () => {
     const result = await login();
     if (result) {
-      refetch();
+      refetch({});
     } else {
       Alert.alert("Error", "Failed to login");
     }
@@ -36,11 +36,9 @@ const Auth = () => {
         <Image source={images.onboarding} style={styles.image} resizeMode="contain" />
 
         <View style={styles.textContainer}>
-          <Text style={styles.welcomeText}>Welcome To Vital Tracks</Text>
 
-          <Text style={styles.titleText}>
-          Ready to take the first step toward better health? {"\n"}
-            <Text style={styles.highlightText}>Your health, your journey</Text>
+          <Text style={styles.signText}>
+          Ready to take the first step toward better health? 
           </Text>
 
           <Text style={styles.loginText}>Login to Vital Tracks with Google</Text>
@@ -60,14 +58,16 @@ const Auth = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#e6f7ff",
+    backgroundColor: "#3867a1",
   },
   scrollContainer: {
     flexGrow: 1,
   },
   image: {
-    width: "100%",
+    width: "80%",
     height: "60%",
+    marginLeft:35,
+    marginTop:80,
   },
   textContainer: {
     paddingHorizontal: 40,
@@ -83,17 +83,24 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
-    marginTop: 10,
-    color: "#333",
+    marginTop: 40,
+    color: "#DDD",
   },
   highlightText: {
-    color: "#3498db",
+    color: "#e6f7ff",
+  },
+  signText: {
+    fontSize: 20,
+    color: "#DDD",
+    textAlign: "center",
+    marginTop: 10,
+    fontWeight: "bold",
   },
   loginText: {
     fontSize: 18,
-    color: "#666",
+    color: "#DDD",
     textAlign: "center",
-    marginTop: 30,
+    marginTop: 10,
   },
   loginButton: {
     backgroundColor: "white",

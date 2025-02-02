@@ -9,8 +9,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Dimensions,
   Pressable,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker"; // Import Picker component
 
 const symptomsList = [
   "Chest Pain",
@@ -21,6 +23,32 @@ const symptomsList = [
   "Blurred Vision",
 ];
 
+const hospitalList = [
+  "Adarsh Hospital",
+  "Adventist Wockhardt Heart Hospital",
+  "Agrawal Hospital",
+  "Anand Hospital",
+  "Apollo Hospital",
+  "Apple Hospital",
+  "Ashaktashram Hospital",
+];
+
+type DiseaseMapping = {
+  [key: string]: {
+    disease: string;
+    cure: string;
+  };
+};
+
+const diseaseMapping: DiseaseMapping = {
+  "Chest Pain": { disease: "Heart Attack", cure: "Immediate medical attention and surgery" },
+  "Dizziness": { disease: "Vertigo", cure: "Vestibular rehabilitation" },
+  "Headache": { disease: "Migraine", cure: "Pain relievers and rest" },
+  "Vomiting": { disease: "Food Poisoning", cure: "Stay hydrated and rest" },
+  "Sudden Loss of Weight": { disease: "Thyroid Issues", cure: "Medication and diet adjustments" },
+  "Blurred Vision": { disease: "Diabetic Retinopathy", cure: "Laser treatment and medications" },
+};
+
 const CustomCheckbox = ({ isChecked, onPress }: { isChecked: boolean; onPress: () => void }) => (
   <Pressable onPress={onPress} style={styles.checkbox}>
     <Text style={styles.checkboxText}>{isChecked ? "✔" : " "}</Text>
@@ -30,11 +58,10 @@ const CustomCheckbox = ({ isChecked, onPress }: { isChecked: boolean; onPress: (
 const SymptomsPage = () => {
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [hospitalName, setHospitalName] = useState(""); // Hospital input as TextInput
+  const [hospitalName, setHospitalName] = useState(hospitalList[0]); // Default to first hospital
   const [appointmentDay, setAppointmentDay] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
   const [resultVisible, setResultVisible] = useState(false);
-  const [diseaseInfo, setDiseaseInfo] = useState<any>(null); // Store the disease information
 
   const scrollViewRef = useRef<ScrollView>(null);
   const resultRef = useRef<View>(null);
@@ -47,45 +74,17 @@ const SymptomsPage = () => {
     );
   };
 
-  const handleCheckIssue = async () => {
+  const handleCheckIssue = () => {
     if (selectedSymptoms.length > 0) {
-      try {
-        // Make a POST request using fetch instead of Axios
-        const response = await fetch("http://localhost:8000/check_symptoms", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            symptoms: selectedSymptoms,
-          }),
-        });
-
-        // Parse the JSON response
-        const data = await response.json();
-
-        // Handle if the response is not successful
-        if (!response.ok) {
-          throw new Error(data.message || "Error fetching disease info");
-        }
-
-        // Set the result and show it
-        setDiseaseInfo(data);
-        setResultVisible(true);
-
-        // Scroll to the result
-        setTimeout(() => {
-          resultRef.current?.measureLayout(
-            scrollViewRef.current as any,
-            (_x, y) => {
-              scrollViewRef.current?.scrollTo({ y, animated: true });
-            }
-          );
-        }, 300);
-      } catch (error) {
-        console.error("Error fetching disease info:", error);
-        Alert.alert("Error", "Unable to fetch diagnosis.");
-      }
+      setResultVisible(true);
+      setTimeout(() => {
+        resultRef.current?.measureLayout(
+          scrollViewRef.current as any,
+          (_x, y) => {
+            scrollViewRef.current?.scrollTo({ y, animated: true });
+          }
+        );
+      }, 300);
     } else {
       Alert.alert("Error", "Please select at least one symptom.");
     }
@@ -101,17 +100,14 @@ const SymptomsPage = () => {
   };
 
   const renderDiseaseInfo = () => {
-    if (!diseaseInfo) return null;
+    const diseaseInfo = selectedSymptoms.map((symptom) => diseaseMapping[symptom]);
+    const firstDisease = diseaseInfo[0];
 
     return (
       <View style={styles.diseaseInfoContainer} ref={resultRef}>
-        {diseaseInfo.map((info: any, index: number) => (
-          <View key={index}>
-            <Text style={styles.diseaseTitle}>Possible Diagnosis</Text>
-            <Text style={styles.diseaseText}>Condition: {info.disease}</Text>
-            <Text style={styles.cureText}>Suggested Treatment: {info.cure}</Text>
-          </View>
-        ))}
+        <Text style={styles.diseaseTitle}>Possible Diagnosis</Text>
+        <Text style={styles.diseaseText}>Condition: {firstDisease.disease}</Text>
+        <Text style={styles.cureText}>Suggested Treatment: {firstDisease.cure}</Text>
 
         <TouchableOpacity style={styles.bookButton} onPress={() => setModalVisible(true)}>
           <Text style={styles.bookButtonText}>Book Appointment</Text>
@@ -149,13 +145,16 @@ const SymptomsPage = () => {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Book an Appointment</Text>
 
-            <Text style={styles.label}>Hospital Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Hospital Name"
-              value={hospitalName}
-              onChangeText={setHospitalName}
-            />
+            <Text style={styles.label}>Select Hospital</Text>
+            <Picker
+              selectedValue={hospitalName}
+              onValueChange={(itemValue) => setHospitalName(itemValue)}
+              style={styles.picker}
+            >
+              {hospitalList.map((hospital, index) => (
+                <Picker.Item key={index} label={hospital} value={hospital} />
+              ))}
+            </Picker>
 
             <TextInput style={styles.input} placeholder="Appointment Day" value={appointmentDay} onChangeText={setAppointmentDay} />
             <TextInput style={styles.input} placeholder="Preferred Time" value={appointmentTime} onChangeText={setAppointmentTime} />
@@ -179,12 +178,13 @@ const styles = StyleSheet.create({
   checkIssueButton: { backgroundColor: "#3867a1", padding: 12, borderRadius: 8, alignItems: "center", marginTop: 20 },
   checkIssueText: { color: "white", fontSize: 16, fontWeight: "bold" },
   resultContainer: { padding: 20, backgroundColor: "#fff", borderRadius: 8, elevation: 3, marginTop: 20 },
-  container: { flex: 1, backgroundColor: "#f9f9f9", paddingHorizontal: 10, marginBottom: 70 },
+  container: { flex: 1, backgroundColor: "#f9f9f9", paddingHorizontal: 10, marginBottom:70, },
   header: { backgroundColor: "#3867a1", padding: 25, borderRadius: 20, alignItems: "center" },
   headerText: { fontSize: 24, fontWeight: "bold", color: "white" },
   scrollViewContent: { paddingBottom: 32 },
   subHeader: { fontSize: 18, color: "#333", marginBottom: 20, textAlign: "center", marginTop: 20 },
   symptomCard: { flexDirection: "row", alignItems: "center", backgroundColor: "#ffffff", padding: 15, marginBottom: 10, borderRadius: 8, elevation: 3 },
+  picker: { width: "100%", height: 50, backgroundColor: "#fff", marginBottom: 10 },
   input: { width: "100%", padding: 12, borderWidth: 1, borderColor: "#ccc", borderRadius: 6, marginBottom: 10 },
   bookButton: { backgroundColor: "#3867a1", padding: 12, borderRadius: 8, alignItems: "center", marginTop: 10 },
   bookButtonText: { color: "white", fontSize: 16, fontWeight: "bold" },

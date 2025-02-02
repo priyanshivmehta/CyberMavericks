@@ -6,7 +6,7 @@ import { View, Text, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import * as Speech from "expo-speech"; // Import Text-to-Speech
 
 const openai = new OpenAI({
-  apiKey: "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",
+  apiKey: "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",
   dangerouslyAllowBrowser: true,
 });
 
