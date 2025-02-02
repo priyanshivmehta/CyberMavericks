@@ -36,14 +36,14 @@ const Auth = () => {
         <Image source={images.onboarding} style={styles.image} resizeMode="contain" />
 
         <View style={styles.textContainer}>
-          <Text style={styles.welcomeText}>Welcome To Real Scout</Text>
+          <Text style={styles.welcomeText}>Welcome To Vital Tracks</Text>
 
           <Text style={styles.titleText}>
-            Let's Get You Closer To {"\n"}
-            <Text style={styles.highlightText}>Your Ideal Home</Text>
+          Ready to take the first step toward better health? {"\n"}
+            <Text style={styles.highlightText}>Your health, your journey</Text>
           </Text>
 
-          <Text style={styles.loginText}>Login to Real Scout with Google</Text>
+          <Text style={styles.loginText}>Login to Vital Tracks with Google</Text>
 
           <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
             <View style={styles.buttonContent}>
@@ -60,7 +60,7 @@ const Auth = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#e6f7ff",
   },
   scrollContainer: {
     flexGrow: 1,
@@ -122,3 +122,6 @@ const styles = StyleSheet.create({
 });
 
 export default Auth;
+
+
+

@@ -1,208 +1,240 @@
+import React, { useState, useEffect, useRef } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  Image,
+  View,
   Text,
   TouchableOpacity,
-  View,
+  Animated,
   StyleSheet,
+  Image,
+  Alert,
+  TouchableWithoutFeedback,
 } from "react-native";
-import { useEffect } from "react";
-import { router, useLocalSearchParams } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-import icons from "@/constants/icons";
-import Search from "@/components/Search";
-import Filters from "@/components/Filters";
-import NoResults from "@/components/NoResults";
-import { Card, FeaturedCard } from "@/components/Cards";
-import { useAppwrite } from "@/lib/useAppwrite";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import * as Speech from "expo-speech"; // Import Text-to-Speech
 import { useGlobalContext } from "@/lib/global-provider";
-import { getLatestProperties, getProperties } from "@/lib/appwrite";
 
-const Home = () => {
+export default function HealthDashboard() {
   const { user } = useGlobalContext();
-  const params = useLocalSearchParams<{ query?: string; filter?: string }>();
-
-  const { data: latestProperties, loading: latestPropertiesLoading } =
-    useAppwrite({ fn: getLatestProperties });
-
-  const {
-    data: properties,
-    refetch,
-    loading,
-  } = useAppwrite({
-    fn: getProperties,
-    params: {
-      filter: params.filter!,
-      query: params.query!,
-      limit: 6,
-    },
-    skip: true,
-  });
+  const [heartRate, setHeartRate] = useState(72);
+  const [bp, setBp] = useState("120/80");
+  const [spo2, setSpo2] = useState(98);
+  const [stress, setStress] = useState("Normal");
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const lastTap = useRef(0);
+  const [isSpeaking, setIsSpeaking] = useState(false); // Track speech state
 
   useEffect(() => {
-    refetch({
-      filter: params.filter!,
-      query: params.query!,
-      limit: 6,
-    });
-  }, [params.filter, params.query]);
+    const interval = setInterval(() => {
+      setHeartRate(Math.floor(Math.random() * (100 - 60 + 1)) + 60);
+    }, 3000);
 
-  const handleCardPress = (id: string) => router.push(`/properties/${id}`);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  // 🔥 Function to Handle Text-to-Speech
+  const speakText = (text) => {
+    Speech.speak(text, { rate: 1.0, pitch: 1.0 });
+    setIsSpeaking(true);
+  };
+
+  const stopSpeech = () => {
+    Speech.stop();
+    setIsSpeaking(false);
+  };
+
+  // 🔥 Detect Double Tap to Start/Stop Speech
+  const handleTextToSpeech = (text) => {
+    const now = Date.now();
+    if (now - lastTap.current < 300) {
+      if (isSpeaking) {
+        stopSpeech();
+      } else {
+        speakText(text);
+      }
+    }
+    lastTap.current = now;
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        data={properties}
-        numColumns={2}
-        renderItem={({ item }) => (
-          <Card item={item} onPress={() => handleCardPress(item.$id)} />
-        )}
-        keyExtractor={(item) => item.$id}
-        contentContainerStyle={styles.contentContainer}
-        columnWrapperStyle={styles.columnWrapper}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          loading ? (
-            <ActivityIndicator size="large" color="#4A90E2" style={styles.loader} />
-          ) : (
-            <NoResults />
-          )
-        }
-        ListHeaderComponent={() => (
-          <View style={styles.headerContainer}>
-            <View style={styles.headerRow}>
-              <View style={styles.userInfo}>
-                <Image
-                  source={{ uri: user?.avatar }}
-                  style={styles.avatar}
-                />
-                <View style={styles.userTextContainer}>
+    <TouchableWithoutFeedback onPress={() => handleTextToSpeech("Health Dashboard")}>
+      <View style={styles.container}>
+        {/* User Profile Section */}
+        <View style={styles.headerRow}>
+          <View style={styles.userInfo}>
+            <Image
+              source={{ uri: user?.avatar || "https://via.placeholder.com/48" }}
+              style={styles.avatar}
+            />
+            <View style={styles.userTextContainer}>
+              <TouchableWithoutFeedback onPress={() => handleTextToSpeech(`Good Morning, ${user?.name || "John Doe"}`)}>
+                <View>
                   <Text style={styles.greetingText}>Good Morning</Text>
-                  <Text style={styles.userName}>{user?.name}</Text>
+                  <Text style={styles.userName}>{user?.name || "John Doe"}</Text>
                 </View>
-              </View>
-              <Image source={icons.bell} style={styles.icon} />
-            </View>
-
-            <Search />
-
-            <View style={styles.sectionContainer}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Featured</Text>
-                <TouchableOpacity>
-                  <Text style={styles.linkText}>See all</Text>
-                </TouchableOpacity>
-              </View>
-
-              {latestPropertiesLoading ? (
-                <ActivityIndicator size="large" color="#4A90E2" />
-              ) : !latestProperties || latestProperties.length === 0 ? (
-                <NoResults />
-              ) : (
-                <FlatList
-                  data={latestProperties}
-                  renderItem={({ item }) => (
-                    <FeaturedCard
-                      item={item}
-                      onPress={() => handleCardPress(item.$id)}
-                    />
-                  )}
-                  keyExtractor={(item) => item.$id}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.featuredList}
-                />
-              )}
-            </View>
-
-            <View style={styles.sectionContainer}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Our Recommendation</Text>
-                <TouchableOpacity>
-                  <Text style={styles.linkText}>See all</Text>
-                </TouchableOpacity>
-              </View>
-              <Filters />
+              </TouchableWithoutFeedback>
             </View>
           </View>
-        )}
-      />
-    </SafeAreaView>
+        </View>
+
+        {/* Heartbeat Button with Animation */}
+        <Animated.View style={[styles.heartButton, { transform: [{ scale: scaleAnim }] }]}>
+          <Icon name="heart-pulse" size={50} color="white" />
+          <TouchableWithoutFeedback onPress={() => handleTextToSpeech(`${heartRate} beats per minute`)}>
+            <Text style={styles.heartText}>{heartRate} BPM</Text>
+          </TouchableWithoutFeedback>
+        </Animated.View>
+
+        {/* Medical Ratings */}
+        <View style={styles.grid}>
+          {[
+            { label: "Blood Pressure", value: bp },
+            { label: "SpO2 Levels", value: `${spo2}%` },
+            { label: "Stress Level", value: stress },
+            { label: "ECG Data", value: "Stable" },
+          ].map((item, index) => (
+            <TouchableWithoutFeedback key={index} onPress={() => handleTextToSpeech(`${item.label}: ${item.value}`)}>
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>{item.label}</Text>
+                <Text style={[styles.cardValue, { color: "#3867a1" }]}>{item.value}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          ))}
+        </View>
+
+        {/* SOS Button */}
+        <TouchableOpacity
+          style={styles.sosButton}
+          onPress={() => {
+            handleTextToSpeech("Emergency Alert Sent!");
+            alert("Emergency Alert Sent!");
+          }}
+        >
+          <Icon name="alert-circle" size={26} color="white" />
+          <Text style={styles.sosText}>SOS Emergency</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableWithoutFeedback>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
-  },
-  contentContainer: {
-    paddingBottom: 32,
-  },
-  columnWrapper: {
-    flex: 1,
-    gap: 10,
-    paddingHorizontal: 10,
-  },
-  loader: {
-    marginTop: 10,
-  },
-  headerContainer: {
-    paddingHorizontal: 10,
+    alignItems: "center",
+    backgroundColor: "#e6f7ff",
+    padding: 20,
+    paddingTop: 40,
   },
   headerRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
-    marginTop: 10,
+    width: "100%",
+    marginBottom: 20,
   },
   userInfo: {
     flexDirection: "row",
     alignItems: "center",
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: "#007BFF",
   },
   userTextContainer: {
-    marginLeft: 8,
+    marginLeft: 12,
   },
   greetingText: {
-    fontSize: 12,
-    color: "#666",
+    fontSize: 14,
+    color: "#333",
   },
   userName: {
-    fontSize: 16,
-    fontWeight: "500",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#007BFF",
   },
-  icon: {
-    width: 24,
-    height: 24,
-  },
-  sectionContainer: {
-    marginVertical: 10,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  heartButton: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: "#3867a1",
+    justifyContent: "center",
     alignItems: "center",
+    marginTop: 10,
+    elevation: 10,
   },
-  sectionTitle: {
+  heartText: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginTop: 25,
+    width: "100%",
+  },
+  card: {
+    width: "45%",
+    padding: 15,
+    backgroundColor: "white",
+    borderRadius: 12,
+    elevation: 5,
+    alignItems: "center",
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#042140",
+  },
+  cardValue: {
+    fontSize: 18,
+    marginTop: 10,
+    fontWeight: "bold",
+  },
+  sosButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#3867a1",
+    paddingVertical: 15,
+    paddingHorizontal: 35,
+    borderRadius: 12,
+    marginTop: 30,
+    elevation: 8,
+  },
+  sosText: {
+    color: "white",
     fontSize: 18,
     fontWeight: "bold",
-  },
-  linkText: {
-    fontSize: 14,
-    color: "#4A90E2",
-    fontWeight: "bold",
-  },
-  featuredList: {
-    marginTop: 10,
-    gap: 10,
+    marginLeft: 10,
   },
 });
 
-export default Home;
+export { HealthDashboard };

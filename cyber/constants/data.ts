@@ -57,8 +57,8 @@ export const featuredCards = [
 
 export const categories = [
   { title: "All", category: "All" },
-  { title: "Houses", category: "House" },
-  { title: "Condos", category: "Condos" },
+  { title: "Helpline", category: "Helpline" },
+  { title: "Symptoms", category: "Symptoms" },
   { title: "Duplexes", category: "Duplexes" },
   { title: "Studios", category: "Studios" },
   { title: "Villas", category: "Villa" },
@@ -77,29 +77,26 @@ export const settings = [
     icon: icons.wallet,
   },
   {
-    title: "Profile",
+    title: "medical Profile",
     icon: icons.person,
   },
+  
   {
-    title: "Notifications",
-    icon: icons.bell,
-  },
-  {
-    title: "Security",
+    title: "Fitness Guide",
     icon: icons.shield,
   },
   {
-    title: "Language",
+    title: "Frequently Asked Questions",
     icon: icons.language,
   },
   {
-    title: "Help Center",
+    title: "Terms and Conditions",
     icon: icons.info,
   },
-  {
-    title: "Invite Friends",
-    icon: icons.people,
-  },
+  // {
+  //   title: "Invite Friends",
+  //   icon: icons.people,
+  // },
 ];
 
 export const facilities = [

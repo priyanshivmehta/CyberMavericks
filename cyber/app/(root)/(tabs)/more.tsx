@@ -1,224 +1,335 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { GiftedChat, Bubble, InputToolbar, Send, IMessage } from 'react-native-gifted-chat';
-import uuid from 'react-native-uuid';
-import OpenAI from "openai";
-import { View, Text, StyleSheet, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+// import React, { useState, useEffect } from "react";
+// import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
+// import MapView, { Marker } from "react-native-maps";
+// import * as Location from "expo-location";
 
-const openai = new OpenAI({ 
-  apiKey: "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", 
-  dangerouslyAllowBrowser: true
-});
+// export default function NearbyHospitals() {
+//   const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
+  
+//   interface Hospital {
+//     geometry: {
+//       location: {
+//         lat: number;
+//         lng: number;
+//       };
+//     };
+//     name: string;
+//     vicinity: string;
+//   }
 
-export function ChatScreen() {
-  const [messages, setMessages] = useState<IMessage[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
+//   const [hospitals, setHospitals] = useState<Hospital[]>([]);
+//   const [loading, setLoading] = useState(true);
 
-  // Predefined Q&A
-  const predefinedResponses: { [key: string]: string } = {
-    "how are you?": "I'm fine! What about you?",
-    "hello": "Hello! How can I assist you today?",
-    "who are you?": "I'm your AI assistant, here to help you.",
-    "what can you do?": "I can answer your questions, provide recommendations, and assist you with general information.",
-  };
+//   useEffect(() => {
+//     (async () => {
+//       let { status } = await Location.requestForegroundPermissionsAsync();
+//       if (status !== "granted") {
+//         Alert.alert("Permission Denied", "Allow location access to see nearby hospitals.");
+//         setLoading(false);
+//         return;
+//       }
 
-  // Function to process user messages
-  const test = async (userMessage: string) => {
-    try {
-      setIsTyping(true);
-      const lowerCaseMessage = userMessage.toLowerCase();
+//       let userLocation = await Location.getCurrentPositionAsync({});
+//       setLocation(userLocation.coords);
+//       fetchNearbyHospitals(userLocation.coords.latitude, userLocation.coords.longitude);
+//     })();
+//   }, []);
+
+//   const fetchNearbyHospitals = async (latitude: number, longitude: number) => {
+//     const apiKey = "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"; // Replace with your actual API key
+//     const radius = 10000; // 5 km range
+//     const type = "Hospital";
+
+//     try {
+//       const response = await fetch(
+//         `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=${type}&key=${apiKey}`
+//       );
+//       const data = await response.json();
       
-      if (predefinedResponses[lowerCaseMessage as keyof typeof predefinedResponses]) {
-        const predefinedReply = predefinedResponses[lowerCaseMessage as keyof typeof predefinedResponses];
+//       console.log("Hospital Data:", JSON.stringify(data, null, 2)); // Debug API response
+      
+//       if (data.results && data.results.length > 0) {
+//         setHospitals(data.results);
+//       } else {
+//         Alert.alert("No Hospitals Found", "No hospitals were found nearby. Try increasing the search radius.");
+//       }
+//     } catch (error) {
+//       Alert.alert("Error", "Failed to fetch hospitals.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-        const botMessage = {
-          _id: uuid.v4().toString(),
-          text: predefinedReply,
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: 'Maverick',
-            avatar: 'https://placeimg.com/140/140/tech',
-          },
-        };
+//   return (
+//     <View style={styles.container}>
+//       {loading ? (
+//         <ActivityIndicator size="large" color="#007BFF" />
+//       ) : location ? (
+//         <MapView
+//           style={styles.map}
+//           initialRegion={{
+//             latitude: location.latitude,
+//             longitude: location.longitude,
+//             latitudeDelta: 0.05,
+//             longitudeDelta: 0.05,
+//           }}
+//         >
+//           {/* User Location Marker */}
+//           <Marker
+//             coordinate={{ latitude: location.latitude, longitude: location.longitude }}
+//             title="You Are Here"
+//             pinColor="blue"
+//           />
 
-        setMessages(previousMessages => GiftedChat.append(previousMessages, [botMessage as IMessage]));
-        setIsTyping(false);
+//           {/* Nearby Hospitals Markers */}
+//           {hospitals.length > 0 ? (
+//             hospitals.map((hospital, index) =>
+//               hospital.geometry && hospital.geometry.location ? (
+//                 <Marker
+//                   key={index}
+//                   coordinate={{
+//                     latitude: hospital.geometry.location.lat,
+//                     longitude: hospital.geometry.location.lng,
+//                   }}
+//                   title={hospital.name}
+//                   description={hospital.vicinity}
+//                   pinColor="red"
+//                 />
+//               ) : null
+//             )
+//           ) : (
+//             <Text style={styles.errorText}>No hospitals found nearby.</Text>
+//           )}
+//         </MapView>
+//       ) : (
+//         <Text style={styles.errorText}>Could not fetch location.</Text>
+//       )}
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: { flex: 1 },
+//   map: { flex: 1 },
+//   errorText: { textAlign: "center", fontSize: 18, marginTop: 20, color: "red" },
+// });
+
+
+
+
+
+import React, { useState, useEffect, useRef } from "react";
+import { View, ActivityIndicator, Alert, Text, TouchableOpacity, FlatList, Dimensions } from "react-native";
+import * as Location from "expo-location";
+import { WebView } from "react-native-webview";
+
+const { width } = Dimensions.get("window"); // Get screen width for responsive design
+
+export default function NearbyHealthcareCenters() {
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const webViewRef = useRef<WebView>(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Denied", "Allow location access to see nearby healthcare centers.");
+        setLoading(false);
         return;
       }
 
-      const completion = await openai.chat.completions.create({
-        messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: userMessage }
-        ],
-        model: "gpt-4o-mini",
+      let userLocation = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: userLocation.coords.latitude,
+        longitude: userLocation.coords.longitude,
       });
 
-      const aiMessage = completion.choices[0].message.content;
-
-      const newMessage = {
-        _id: uuid.v4().toString(),
-        text: aiMessage,
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'Maverick',
-          avatar: 'https://placeimg.com/140/140/tech',
-        },
-      };
-
-      setMessages(previousMessages => GiftedChat.append(previousMessages, [newMessage as IMessage]));
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsTyping(false);
-    }
-  };
-
-  const onSend = useCallback((messages: IMessage[]) => {
-    setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
-    const userMessage = messages[0].text;
-    test(userMessage);
+      setLoading(false);
+    })();
   }, []);
 
-  useEffect(() => {
-    const welcomeMessage = {
-      _id: uuid.v4(),
-      text: "Hi there! Welcome to our app. How may I help you today?",
-      createdAt: new Date(),
-      user: {
-        _id: 2,
-        name: 'Maverick',
-        avatar: 'https://placeimg.com/140/140/tech',
-      },
-    };
+  // Healthcare & Other Amenities Filters
+  const amenityCategories = [
+    { key: "all", label: "All Centers" },
+    { key: "hospital", label: "Hospitals" },
+    { key: "clinic", label: "Clinics" },
+    { key: "dental", label: "Dental Centers" },
+    { key: "pharmacy", label: "Pharmacies" },
+    { key: "specialized", label: "Specialized Centers" },
+    { key: "ambulance", label: "Ambulance Services" },
+    { key: "emergency", label: "Emergency Rooms" },
+    { key: "therapy", label: "Therapy Centers" },
+    { key: "rehabilitation", label: "Rehabilitation Centers" },
+  ];
 
-    setMessages([welcomeMessage]);
-  }, []);
+  // HTML & JavaScript for Map Display (Using Leaflet)
+  const mapHtml = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          #map { height: 100vh; width: 100vw; }
+        </style>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+        <script>
+          document.addEventListener("DOMContentLoaded", function() {
+            var userLat = ${location?.latitude || 0};
+            var userLng = ${location?.longitude || 0};
 
-  // Custom Bubble Styling (Blue & White Theme)
-  const renderBubble = (props: any) => {
-    return (
-      <Bubble
-        {...props}
-        wrapperStyle={{
-          right: { backgroundColor: "#007AFF", marginVertical: 10 }, // User messages (blue)
-          left: { backgroundColor: "#E5E5EA", marginVertical: 10 }, // AI messages (gray)
-        }}
-        textStyle={{
-          right: { color: "white", fontSize: 16 },
-          left: { color: "black", fontSize: 16 },
-        }}
-      />
-    );
-  };
+            var map = L.map('map').setView([userLat, userLng], 13);
 
-  // Custom Input Toolbar Styling
-  const renderInputToolbar = (props: any) => (
-    <InputToolbar
-      {...props}
-      containerStyle={{
-        backgroundColor: "black",
-        borderTopColor: "#007AFF",
-        color:"white",
-        borderTopWidth: 1,
-      }}
-    />
-  );
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
 
-  // Custom Send Button
-  const renderSend = (props: any) => (
-    <Send {...props}>
-      <View style={{ marginRight: 10, marginBottom: 5 }}>
-        <Ionicons name="send" size={24} color="#007AFF" />
-      </View>
-    </Send>
-  );
+            L.marker([userLat, userLng]).addTo(map)
+              .bindPopup("You are here")
+              .openPopup();
 
-  // Custom Message Component (Adding AI Icon)
-  const renderMessage = (props: any) => {
-    const { currentMessage } = props;
+            var healthcareMarkers = [];
 
-    if (currentMessage.user._id === 2) {
-      // AI Message - Add Icon
-      return (
-        <View style={styles.aiMessageContainer}>
-          <Image 
-            source={{ uri: 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png' }} // AI Icon
-            style={styles.aiIcon}
-          />
-          <View style={{ flex: 1 }}>
-            <Bubble {...props} />
-          </View>
-        </View>
-      );
-    }
+            function fetchHealthcareCenters(filter) {
+              healthcareMarkers.forEach(marker => map.removeLayer(marker));
+              healthcareMarkers = [];
 
-    // User Message - Normal display
-    return (
-      <View style={{ marginVertical: 10 }}>
-        <Bubble {...props} />
-      </View>
-    );
+              const filterMap = {
+                "all": "",
+                "hospital": "hospital",
+                "clinic": "clinic",
+                "dental": "dental",
+                "pharmacy": "pharmacy",
+                "ambulance": "ambulance_station",
+                "emergency": "emergency",
+                "therapy": "therapy",
+                "rehabilitation": "rehabilitation"
+              };
+
+              const filterQuery = filterMap[filter] || "";
+
+              fetch(\`https://overpass-api.de/api/interpreter?data=[out:json];
+                node[amenity=hospital](around:5000,\${userLat},\${userLng});
+                node[amenity=clinic](around:5000,\${userLat},\${userLng});
+                node[amenity=dental](around:5000,\${userLat},\${userLng});
+                node[amenity=pharmacy](around:5000,\${userLat},\${userLng});
+                node[amenity=ambulance_station](around:5000,\${userLat},\${userLng});
+                node[amenity=emergency](around:5000,\${userLat},\${userLng});
+                node[amenity=therapy](around:5000,\${userLat},\${userLng});
+                node[amenity=rehabilitation](around:5000,\${userLat},\${userLng});
+                out;\`)
+                .then(response => response.json())
+                .then(data => {
+                  data.elements.forEach(center => {
+                    if (center.lat && center.lon) {
+                      let centerType = center.tags.amenity || "general";
+
+                      // Match the selected filter with the correct amenity type
+                      if (!filter || filter === "all" || centerType === filterQuery) {
+                        let marker = L.marker([center.lat, center.lon])
+                          .addTo(map)
+                          .bindPopup(center.tags.name || "Unnamed Center");
+                        healthcareMarkers.push(marker);
+                      }
+                    }
+                  });
+                })
+                .catch(error => console.error("Error fetching healthcare centers:", error));
+            }
+
+            fetchHealthcareCenters("${selectedFilter}");
+
+            window.addEventListener("message", (event) => {
+              if (event.data && event.data.filter) {
+                fetchHealthcareCenters(event.data.filter);
+              }
+            });
+          });
+        </script>
+      </head>
+      <body>
+        <div id="map"></div>
+      </body>
+    </html>
+  `;
+
+  // Function to update filter and send data to WebView
+  const updateFilter = (filter: string) => {
+    setSelectedFilter(filter);
+    webViewRef.current?.injectJavaScript(`window.postMessage({ filter: "${filter}" }, "*");`);
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Maverick, your guide for the app</Text>
-        <Text style={styles.emoji}>😉</Text>
-      </View>
+    <View style={{ flex: 1, marginBottom:65 }}>
+      {loading ? (
+        <ActivityIndicator size="large" color="#007BFF" style={{ flex: 1, justifyContent: "center" }} />
+      ) : location ? (
+        <>
+          {/* Map Display */}
+          <WebView
+            ref={webViewRef}
+            originWhitelist={["*"]}
+            source={{ html: mapHtml }}
+            style={{ flex: 1 }}
+            injectedJavaScript={`window.postMessage({ filter: "${selectedFilter}" }, "*");`}
+          />
 
-      {/* Chat UI */}
-      <GiftedChat
-        messages={messages}
-        onSend={messages => onSend(messages)}
-        user={{ _id: 1 }}
-        renderBubble={renderBubble}
-        renderInputToolbar={renderInputToolbar}
-        renderSend={renderSend}
-        renderMessage={renderMessage} // AI Icon beside messages
-        isTyping={isTyping}
-      />
+          {/* Fixed Filter Panel */}
+          <View
+            style={{
+              position: "absolute",
+              bottom: 0,
+              width: "100%",
+              backgroundColor: "white",
+              paddingVertical: 15,
+              paddingHorizontal: 20,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 5,
+              elevation: 5,
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "bold", textAlign: "center", marginBottom: 10 }}>
+              Filter Healthcare Centers
+            </Text>
+            <FlatList
+              data={amenityCategories}
+              keyExtractor={(item) => item.key}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: selectedFilter === item.key ? "#3867a1" : "#ddd",
+                    padding: 15,
+                    borderRadius: 8,
+                    marginHorizontal: 10,
+                  }}
+                  onPress={() => updateFilter(item.key)}
+                >
+                  <Text
+                    style={{
+                      color: selectedFilter === item.key ? "white" : "black",
+                      fontSize: 16,
+                    }}
+                  >
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </>
+      ) : (
+        <Text style={{ textAlign: "center", fontSize: 18, marginTop: 20, color: "red" }}>
+          Could not fetch location.
+        </Text>
+      )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-    marginBottom: 70,
-  },
-  header: {
-    backgroundColor: "#007AFF",  // Blue header
-    padding: 15,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  headerText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "white",
-  },
-  emoji: {
-    fontSize: 18,
-    marginLeft: 5,
-  },
-  aiMessageContainer: {
-    flexDirection: "row", 
-    alignItems: "center", 
-    marginLeft: 10,
-    marginBottom:10,
-  },
-  aiIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 5,
-  },
-});
-
-export default ChatScreen;
