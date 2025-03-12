@@ -5,14 +5,20 @@ Vital Track is an AI-driven health assistant designed to provide instant medical
 
 ---
 
-## 🔥 Features
+## Features:
 
 ✅ **Iris – Your AI Health Buddy**: AI-powered chatbot to assist users with health-related queries
+
 ✅ **Voice-Enabled Chatbot**: Double-tap anywhere, and the app reads the text aloud for accessibility
+
 ✅ **Medical Report Section**: Store and view personal health records
+
 ✅ **Symptoms Identification Page**: Select symptoms manually and receive possible conditions & recommendations
+
 ✅ **Find Nearest Health Centers**: See all nearby hospitals and clinics on an interactive map
+
 ✅ **Book an Appointment**: Schedule a consultation with a doctor and receive notifications
+
 ✅ **Shake Detection SOS System**: If a fall is detected, the app **automatically sends an SOS SMS** to emergency contacts; users can also manually send an SOS alert
 
 ---
@@ -33,7 +39,7 @@ Vital Track is an AI-driven health assistant designed to provide instant medical
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 Installation & Setup:
 
 ### Prerequisites:
 - Install **Node.js** and **npm/yarn**
