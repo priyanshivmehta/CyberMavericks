@@ -1,6 +1,6 @@
 # Vital Track - Your AI-Powered Health Assistant 🚀
 
-## 📌 Introduction
+## Introduction
 Vital Track is an AI-driven health assistant designed to provide instant medical guidance, emergency response, and accessibility features. Built during **DotSlash 8.0**, this app leverages **AI, text-to-speech, location services, and emergency SOS detection** to enhance user experience and improve healthcare accessibility.
 
 ---
